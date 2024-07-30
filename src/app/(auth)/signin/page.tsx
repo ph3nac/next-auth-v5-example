@@ -1,7 +1,7 @@
 "use client";
 
 import { useFormState } from "react-dom";
-import { SignUpState, signup } from "../_action/action";
+import { SignUpState, signin, signup } from "../_action/action";
 
 export default function SignInPage() {
   const initialState = {
@@ -9,7 +9,7 @@ export default function SignInPage() {
     message: null,
   } satisfies SignUpState;
 
-  const [state, dispatch] = useFormState(signup, initialState);
+  const [state, dispatch] = useFormState(signin, initialState);
   return (
     <div className="relative flex h-screen flex-col justify-center overflow-hidden">
       <div className="m-auto w-full rounded bg-white p-6 shadow-md md:max-w-lg">

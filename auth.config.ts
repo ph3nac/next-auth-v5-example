@@ -1,5 +1,4 @@
 import type { NextAuthConfig, Session, User } from "next-auth";
-import { getIsTokenValid } from "./lib/utils/auth";
 import { JWT } from "next-auth/jwt";
 import { NextRequest } from "next/server";
 
@@ -12,20 +11,24 @@ export const authConfig = {
     // NextResponseを返すことでリダイレクトやエラーを返すことができる
     authorized({
       auth,
-      request,
+      request: { nextUrl },
     }: {
       auth: Session | null;
       request: NextRequest;
     }) {
-      console.log("authorized", auth);
-      const backendToken = auth?.backendToken;
-      const isLoggedIn = !!auth?.user;
-      const isTokenValid = getIsTokenValid(auth?.user?.backendToken);
+      console.log("authorized", auth, nextUrl.pathname);
 
-      // falseを返すと，Signinページにリダイレクトされる
-      if (!isTokenValid) {
-        return false;
+      const isOnAuthenticatedPage = nextUrl.pathname.startsWith("/user");
+
+      if (isOnAuthenticatedPage) {
+        const isLoggedin = !!auth?.user;
+        if (!isLoggedin) {
+          // falseを返すと，Signinページにリダイレクトされる
+          return false;
+        }
+        return true;
       }
+      return true;
     },
     // JSON Web Token が作成されたとき（サインイン時など）や更新されたとき（クライアントでセッションにアクセスしたときなど）に呼び出される。ここで返されるものはすべて JWT に保存され，session callbackに転送される。そこで、クライアントに返すべきものを制御できる。それ以外のものは、フロントエンドからは秘匿される。JWTはAUTH_SECRET環境変数によってデフォルトで暗号化される。
     // セッションに何を追加するかを決定するために使用される

@@ -1,11 +1,17 @@
 "use server";
+
+import email from "next-auth/providers/email";
+import { redirect } from "next/navigation";
+import { signIn } from "../../../../auth";
+import { AuthError } from "next-auth";
+
 export type LoginState = {
   errors?: {
     name?: string[];
     email?: string[];
     password?: string[];
   };
-  valuee?: {
+  value?: {
     name?: string;
     email?: string;
     password?: string;
@@ -18,12 +24,25 @@ export const signup = async (
   formData: FormData
 ): Promise<LoginState> => {
   // signup処理
-  return {
-    errors: {
-      name: ["name is invalid"],
-      email: ["email is invalid"],
-      password: ["password is invalid"],
+  const url = process.env.API_URL + "/auth/signup";
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
     },
+    body: JSON.stringify({
+      name: formData.get("name"),
+      email: formData.get("email"),
+      password: formData.get("password"),
+    }),
+  });
+
+  // ログインページにリダイレクト
+  if (res.status === 201) {
+    redirect("/signin");
+  }
+  return {
     message: "signup failed",
   };
 };
@@ -45,11 +64,24 @@ export const signin = async (
   formData: FormData
 ): Promise<SignUpState> => {
   // login処理
+  try {
+    await signIn("credentials", formData, { redirectTo: "/user" });
+  } catch (error) {
+    if (error instanceof AuthError) {
+      // TODO: 確認
+      switch (error.type) {
+        case "CredentialsSignin": {
+          return {
+            message: "メールアドレスまたはパスワードが正しくありません",
+          };
+        }
+        default: {
+          throw error;
+        }
+      }
+    }
+  }
   return {
-    errors: {
-      email: ["email is invalid"],
-      password: ["password is invalid"],
-    },
-    message: "login failed",
+    message: null,
   };
 };
