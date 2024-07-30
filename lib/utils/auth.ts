@@ -7,7 +7,7 @@ export const parseJwt = (token: string) => {
   }
 };
 
-export const getIsTokenValid = (token: string) => {
+export const getIsTokenValid = (token: string | undefined) => {
   if (!token) return false;
 
   //In JavaScript, a time stamp is the number of milliseconds that have passed since January 1, 1970.
