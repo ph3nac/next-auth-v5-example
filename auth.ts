@@ -7,7 +7,16 @@ import credentials from "next-auth/providers/credentials";
 // signIn: providerを指定してサインインすることができる。指定されていない場合、ユーザはサインインページにリダイレクトされる。デフォルトでは、ユーザはサインイン後に現在のページにリダイレクトされます。redirectToオプションに相対パスを設定することで、この動作をオーバーライドできる。
 //
 // signOut: ユーザーをサインアウトする。セッションがデータベース戦略を使用して作成された場合、セッションはデータベースから削除され、関連するクッキーは無効になります。セッションがJWTを使用して作成された場合、クッキーは無効になる．デフォルトでは、サインアウト後、ユーザーは現在のページにリダイレクトされます。redirectTo オプションに相対パスを設定することで、この動作をオーバーライドできます。
-export const { auth, signIn, signOut } = NextAuth({
+//
+// handlers:
+// NextAuth.jsのRouteHandlerメソッド。これらは、OAuth/Emailプロバイダー用のエンドポイント、および(`/api/auth/session`のような)クライアントから接続できるREST APIエンドポイントを公開するために使用されます。
+// `auth.ts`でNextAuth.jsを初期化した後、これらのメソッドを再エクスポートします。
+// `app/api/auth/[...nextauth]/route.ts`内：
+// export { GET, POST } from "../../../../auth"
+// export const runtime = "edge" // オプション
+// その後、`auth.ts`内で次のように再エクスポートします：
+//export const { handlers: { GET, POST }, auth } = NextAuth({...})
+export const { auth, signIn, signOut, handlers } = NextAuth({
   ...authConfig,
   providers: [
     credentials({
@@ -28,8 +37,7 @@ export const { auth, signIn, signOut } = NextAuth({
         const backendToken = data.accessToken;
         const user = { backendToken };
 
-        console.log("authorize:", user);
-
+        console.log("token:", backendToken);
         if (!backendToken) {
           // 認証に失敗した場合は nullを返すか，エラーを投げることが期待される
           // CredentialsSignin がスローされた場合、または null が返された場合、以下の 2 つのことが起こる：

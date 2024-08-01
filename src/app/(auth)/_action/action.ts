@@ -1,9 +1,9 @@
 "use server";
 
-import email from "next-auth/providers/email";
 import { redirect } from "next/navigation";
 import { signIn } from "../../../../auth";
 import { AuthError } from "next-auth";
+import { isRedirectError } from "next/dist/client/components/redirect";
 
 export type LoginState = {
   errors?: {
@@ -16,13 +16,13 @@ export type LoginState = {
     email?: string;
     password?: string;
   };
-  message: string | null;
+  message?: string;
 };
 
 export const signup = async (
-  _state: LoginState,
+  _state: SignUpState,
   formData: FormData
-): Promise<LoginState> => {
+): Promise<SignUpState> => {
   // signup処理
   const url = process.env.API_URL + "/auth/signup";
   const res = await fetch(url, {
@@ -62,26 +62,28 @@ export type SignUpState = {
 export const signin = async (
   _state: LoginState,
   formData: FormData
-): Promise<SignUpState> => {
+): Promise<LoginState> => {
   // login処理
   try {
-    await signIn("credentials", formData, { redirectTo: "/user" });
+    // NEXT_REDIRECTが投げられ，catchでリダイレクトされる
+    await signIn("credentials", formData);
+    return { message: "success" };
   } catch (error) {
     if (error instanceof AuthError) {
-      // TODO: 確認
       switch (error.type) {
-        case "CredentialsSignin": {
+        case "CredentialsSignin":
+          console.error("Signin error:", error);
           return {
-            message: "メールアドレスまたはパスワードが正しくありません",
+            message: "メールアドレスまたはパスワードが間違っています",
           };
-        }
-        default: {
-          throw error;
-        }
       }
     }
+    // リダイレクトエラーの場合はリダイレクト
+    if (isRedirectError(error)) {
+      redirect("/user");
+    }
+    return {
+      message: "An unexpected error occurred during signin",
+    };
   }
-  return {
-    message: null,
-  };
 };

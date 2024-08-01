@@ -1,13 +1,12 @@
 "use client";
 
 import { useFormState } from "react-dom";
-import { SignUpState, signin, signup } from "../_action/action";
+import { LoginState, signin } from "../_action/action";
 
 export default function SignInPage() {
   const initialState = {
     errors: {},
-    message: null,
-  } satisfies SignUpState;
+  } satisfies LoginState;
 
   const [state, dispatch] = useFormState(signin, initialState);
   return (
@@ -16,6 +15,10 @@ export default function SignInPage() {
         <h1 className="text-center text-3xl font-semibold text-primary">
           SIGN IN
         </h1>
+        {/* エラーメッセージを表示 */}
+        {state.message && (
+          <div className="text-red-500 text-center">{state.message}</div>
+        )}
         <form action={dispatch} className="space-y-4">
           {/* email */}
           <div>

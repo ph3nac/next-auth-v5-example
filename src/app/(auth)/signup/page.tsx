@@ -1,13 +1,13 @@
 "use client";
 
 import { useFormState } from "react-dom";
-import { LoginState, signup } from "../_action/action";
+import { LoginState, SignUpState, signup } from "../_action/action";
 
 export default function SignUpPage() {
   const initialState = {
     errors: {},
     message: null,
-  } satisfies LoginState;
+  } satisfies SignUpState;
 
   const [state, dispatch] = useFormState(signup, initialState);
 
