@@ -1,6 +1,5 @@
-import { Session } from "inspector";
-import { Session, User as DefaultUser, DefaultSession } from "next-auth";
-import { DefaultJWT, JWT } from "next-auth/jwt";
+import { User as DefaultUser, DefaultSession } from "next-auth";
+import { DefaultJWT } from "next-auth/jwt";
 declare module "next-auth" {
   // ログインユーザーのセッション情報，auth(),useSession(),getServerSession()で使用可能
   interface Session extends DefaultSession {
